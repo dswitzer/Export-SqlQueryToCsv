@@ -41,3 +41,15 @@ Or if your SQL is coming from another script/cmdlet, you can pipe in the string:
 ```
 "select * from tableName" | .\query_to_csv.ps1 -database "my-database-name" -output ".\exported-results.csv"
 ```
+
+### Running from Windows Scheduled Task/Batch File
+In order to run a Powershell script in a Scheduled Task or Batch File, you need to pass the script off to the Powershell CLI:
+
+```
+powershell -NoLogo -NoProfile -Mta -ExecutionPolicy RemoteSigned -command "& { C:\Path\To\Export-SqlQueryToCsv.ps1 -query \"select * from tableName\" -output \"C:\Path\To\exported-results.csv\" -database \"my-database-name\" }"
+```
+
+In my testing, there are a few critical things from the command above which were necessary for the script to run at full speed:
+
+1. You must supply the `-ExecutionPolicy RemoteSigned` argument and apparently it needs to be with the `RemotedSigned` execution policy. At least in my testing, every other policy I tested (including `Bypass`) the script would end up running about two times slower than the script run inside Powershell natively.
+2. Likewise, passing the script to the `-File` argument ended up with run times much slower than using the passing the full command via the `-Command` argument.
